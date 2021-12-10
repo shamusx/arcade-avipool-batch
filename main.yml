@@ -1,0 +1,24 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  collections:
+  - vmware.alb
+  tasks:
+  - set_fact: 
+      pool_data: "{{ {'servers': [ { 'ip': { 'addr': pool_member_ip, 'type': 'V4' } }] } }}"
+    when: pool_member_port|length == 0
+    name: "{{ 'Build JSON for ' + action + ' for all pools that have member ' + pool_member_ip }}"
+  - set_fact: 
+      pool_data: "{{ {'servers': [ { 'ip': { 'addr': pool_member_ip, 'type': 'V4' }, 'port': pool_member_port }] } }}"
+    when: pool_member_port|length > 0
+    name: "{{ 'Build JSON for ' + action + ' for all pools that have member ' + pool_member_ip + ' with port ' + pool_member_port }}"
+  - name: "{{ 'Batch Operation against all Pools with PoolMember IP of ' + pool_member_ip }}"
+    avi_api_session:
+      username: "{{ avi_credentials_username }}"
+      password: "{{ avi_credentials_password }}"
+      controller: "{{ avi_credentials_controller }}"
+      api_version: "{{ avi_version }}"
+      http_method: post
+      path: "{{ 'server/' + action }}"
+      data: "{{ pool_data }}"
