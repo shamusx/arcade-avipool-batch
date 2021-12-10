@@ -3,8 +3,8 @@
   connection: local
   gather_facts: no
   vars_files: variables.yml
-  # collections:
-  # - vmware.alb
+  collections:
+  - vmware.alb
   tasks:
   - set_fact: 
       pool_data: "{{ {'servers': [ { 'ip': { 'addr': pool_member_ip, 'type': 'V4' } }] } }}"
